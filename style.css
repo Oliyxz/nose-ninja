@@ -1,0 +1,211 @@
+:root {
+    --bg: #090a0f;
+    --primary: #0ff;
+    --danger: #f0f;
+    --success: #0f0;
+    --text: #fff;
+    --hud-bg: rgba(9, 10, 15, 0.8);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Orbitron', sans-serif;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Canvas taking full screen */
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* Picture in Picture Webcam HUD */
+#webcamContainer {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 240px;
+    height: 180px;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--primary);
+    overflow: hidden;
+    z-index: 10;
+    background: #000;
+}
+
+#webcamContainer video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Mirror webcam */
+}
+
+#meshCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+    pointer-events: none;
+}
+
+/* UI Overlay system */
+#uiOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.screen {
+    background: var(--hud-bg);
+    padding: 40px;
+    border-radius: 15px;
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+    text-align: center;
+    pointer-events: auto;
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Typography */
+.neon-text {
+    font-size: 4rem;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+    margin-bottom: 10px;
+}
+
+.neon-text.danger {
+    color: var(--danger);
+    text-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #aaa;
+}
+
+.instructions {
+    font-size: 1rem;
+    color: var(--success);
+    margin-top: 10px;
+}
+
+.stats {
+    font-size: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+/* In-game HUD */
+#gameHud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+    pointer-events: none;
+}
+
+/* Buttons */
+.cyber-btn {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.cyber-btn:hover {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.profile-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--text);
+    font-size: 1.2rem;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.2s;
+}
+
+.profile-btn:hover {
+    background: rgba(0, 255, 255, 0.3);
+}
+
+.profile-btn .score {
+    color: var(--primary);
+}
+
+/* Loader */
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 3px solid transparent;
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Glitch effect for loading */
+.glitch {
+    position: relative;
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: bold;
+}

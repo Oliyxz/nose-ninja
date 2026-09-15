@@ -1,15 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quick Draw CV</title>
-    <!-- Load ml5.js for machine learning -->
-    <script src="https://unpkg.com/ml5@1.2.1/dist/ml5.min.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nose Ninja: Facial Recognition Runner</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Picture-in-Picture Webcam HUD -->
+    <div id="webcamContainer">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="meshCanvas"></canvas>
+    </div>
+
+    <!-- UI Overlays -->
+    <div id="uiOverlay">
+        
+        <div id="loadingScreen" class="screen">
+            <h1 class="glitch" data-text="INITIALIZING SYSTEM">INITIALIZING SYSTEM</h1>
+            <p>Loading AI Vision Model...</p>
+            <div class="loader"></div>
+        </div>
+
+        <div id="startScreen" class="screen hidden" style="max-width: 600px;">
+            <div style="width: 130px; height: 130px; margin: 0 auto 15px auto; border-radius: 50%; border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,255,255,0.4); background: #000; cursor: pointer;">
+                <img id="secretLogo" src="logo.jpg" alt="SCA AI Department Logo" style="width: 75%; height: 75%; object-fit: contain; filter: invert(1);">
+            </div>
+            <h1 class="neon-text" style="margin-top: 0;">NOSE NINJA</h1>
+            
+            <div class="game-info" style="margin-bottom: 20px; text-align: justify; font-family: sans-serif; font-size: 1rem; color: #ccc; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                <p style="margin-bottom: 10px;"><strong style="color: var(--primary);">WHAT IS THIS?</strong> An endless runner where you dodge shurikens and collect sushi using only your face!</p>
+                <p><strong style="color: var(--primary);">HOW IT WORKS:</strong> This game uses Google's MediaPipe AI vision model right in your browser. It tracks your facial landmarks through the webcam in real-time, mapping the tip of your nose to the ninja on screen. Stand back, center your face, and lean left or right to move!</p>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 10px; width: 100%;">
+                <button id="start1PBtn" class="cyber-btn" style="flex: 1;">1 PLAYER</button>
+                <button id="start2PBtn" class="cyber-btn" style="flex: 1;">2 PLAYERS (VS)</button>
+            </div>
+            <button id="showLeaderboardBtn" class="cyber-btn" style="margin-top: 15px; font-size: 1rem; padding: 10px 20px; width: 100%;">VIEW LEADERBOARD</button>
+            
+            <div style="margin-top: 25px; font-size: 0.8rem; color: #888; font-family: sans-serif; letter-spacing: 1px; text-transform: uppercase;">
+                Made by Orlando Igwe - SWE of SCA AI Department.
+            </div>
+        </div>
+
+        <div id="calibrationScreen" class="screen hidden">
+            <h2>CALIBRATING...</h2>
+            <p>Center your face in the camera frame.</p>
+        </div>
+
+        <div id="gameOverScreen" class="screen hidden">
+            <h1 class="neon-text danger">GAME OVER</h1>
+            <div class="stats" id="gameOverStats">
+                <p>SCORE: <span id="finalScore">0</span></p>
+                <p>HIGH SCORE: <span id="highScore">0</span></p>
+            </div>
+            <button id="restartBtn" class="cyber-btn">MAIN MENU</button>
+        </div>
+
+        <div id="vsSetupScreen" class="screen hidden">
+            <h2 class="neon-text">VS LOBBY</h2>
+            <div style="display: flex; gap: 20px; width: 100%; margin: 20px 0;">
+                <div style="flex: 1; text-align: center; padding: 15px; border: 2px solid #0ff; border-radius: 10px; background: rgba(0, 255, 255, 0.1);">
+                    <h3 style="color: #0ff; margin-bottom: 10px;">LEFT PLAYER (P1)</h3>
+                    <input type="text" id="p1Input" placeholder="Name" maxlength="12" style="width: 100%; font-size: 1.2rem; padding: 10px; text-align: center; text-transform: uppercase; background: transparent; color: #0ff; border: 1px solid #0ff; outline: none;">
+                </div>
+                <div style="flex: 1; text-align: center; padding: 15px; border: 2px solid #f0f; border-radius: 10px; background: rgba(255, 0, 255, 0.1);">
+                    <h3 style="color: #f0f; margin-bottom: 10px;">RIGHT PLAYER (P2)</h3>
+                    <input type="text" id="p2Input" placeholder="Name" maxlength="12" style="width: 100%; font-size: 1.2rem; padding: 10px; text-align: center; text-transform: uppercase; background: transparent; color: #f0f; border: 1px solid #f0f; outline: none;">
+                </div>
+            </div>
+            <button id="startFightBtn" class="cyber-btn" style="font-size: 2rem; padding: 15px 50px; background: rgba(0, 255, 255, 0.2);">FIGHT!</button>
+            <button id="cancelVsBtn" class="cyber-btn" style="margin-top: 15px; font-size: 1rem; border-color: var(--danger); color: var(--danger);">CANCEL</button>
+        </div>
+
+        <div id="profileSelectScreen" class="screen hidden">
+            <h2 class="neon-text" id="profileSelectTitle">SELECT PROFILE</h2>
+            <div id="profileList" style="max-height: 200px; overflow-y: auto; width: 100%; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Profile buttons injected here -->
+            </div>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <input type="text" id="newProfileInput" placeholder="New Profile Name" maxlength="12" style="flex: 1; font-size: 1.2rem; padding: 10px; background: transparent; color: var(--primary); border: 2px solid var(--primary); outline: none;">
+                <button id="createProfileBtn" class="cyber-btn" style="padding: 10px;">ADD</button>
+            </div>
+            <button id="cancelProfileBtn" class="cyber-btn" style="margin-top: 20px; border-color: var(--danger); color: var(--danger);">CANCEL</button>
+        </div>
+
+        <div id="leaderboardScreen" class="screen hidden">
+            <h2 class="neon-text">LEADERBOARD</h2>
+            <ol id="leaderboardList" style="text-align: left; font-size: 1.5rem; margin: 20px 0; color: #fff; padding-left: 20px;"></ol>
+            <button id="closeLeaderboardBtn" class="cyber-btn">BACK</button>
+        </div>
+
+        <div id="adminScreen" class="screen hidden" style="border-color: var(--danger); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
+            <h2 class="neon-text danger">ADMIN PANEL</h2>
+            <p style="color: #ccc; margin-bottom: 10px;">Click DELETE to remove a profile forever.</p>
+            <div id="adminProfileList" style="max-height: 300px; overflow-y: auto; width: 100%; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Admin profile buttons injected here -->
+            </div>
+            <button id="closeAdminBtn" class="cyber-btn" style="border-color: var(--danger); color: var(--danger);">EXIT</button>
+        </div>
+
+        <!-- In-game HUD -->
+        <div id="gameHud" class="hidden">
+            <div class="score-display">
+                SCORE: <span id="currentScore">0</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script type="module" src="vision.js"></script>
+    <script type="module" src="game.js"></script>
+</body>
 </html>
